@@ -1,0 +1,19 @@
+<button id='importBtn'>Import from CSV</button>
+
+<script>
+    document.getElementById('importBtn').onclick = () => {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.csv';
+      fileInput.onchange = (event) => {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = () => {
+          const content = reader.result;
+          parent.postMessage({ pluginMessage: { type: "importCSV", data: content } }, '*');
+        };
+        reader.readAsText(file);
+      };
+      fileInput.click();
+    };
+  </script>
