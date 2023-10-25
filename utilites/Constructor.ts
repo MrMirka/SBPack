@@ -1,13 +1,15 @@
-import { getTextBlocks, getFrameBlocks, loadFonts } from "./ElementsFigma";
+import { getTextBlocks, getFrameBlocks, loadFonts, getVectorBlocks } from "./ElementsFigma";
 
 let clubs: any;
 let unions: any;
 let players: any;
+let events: any;
 
-function Initdata(clubs1: any, unions1: any, players1: any) {
+function Initdata(clubs1: any, unions1: any, players1: any, events1: any) {
   clubs = clubs1;
   unions = unions1;
   players = players1;
+  events = events1;
 }
 
 /**
@@ -24,13 +26,17 @@ function createBaseBlock(params: Partial<BaseBlock>): BaseBlock {
 async function makeBanner(data: BaseBlock[], positionY: number): Promise<void> {
   return new Promise(async (resolve, reject) => {
     const dataNew = data.filter(item => item.name !== 'title'); // Массив только для элементов с URL
-
-    const frameOne: FrameNode = figma.createFrame();
+    const frameOne: FrameNode = figma.createFrame(); //Базовый фрейм в которой помещаем элементы
     frameOne.resize(1920, 1080);
     frameOne.x = 0;
     frameOne.y = positionY;
     frameOne.name = "TestBanner" + Date.now();
-
+    
+    const shapes = getVectorBlocks("Base1");
+    shapes.map((shape)=>{
+      frameOne.appendChild(shape);
+    })
+ 
     try {
       const imagePromises = dataNew
         .filter(item => typeof item.imageUrl === 'string')
@@ -42,6 +48,7 @@ async function makeBanner(data: BaseBlock[], positionY: number): Promise<void> {
       const images = await Promise.all(imagePromises);
 
       for (let i = 0; i < images.length; i++) {
+        
         const image = images[i];
         const item = dataNew[i];
         const node = figma.createRectangle();
@@ -66,10 +73,12 @@ async function makeBanner(data: BaseBlock[], positionY: number): Promise<void> {
         title: 'title',
         date: 'date',
         logoCaptionLeft: 'logoCaptionLeft',
-        logoCaptionRight: 'logoCaptionRight'
+        logoCaptionRight: 'logoCaptionRight',
+        eventCaption: 'eventCaption'
       };
       const texts = getTextBlocks("Base1");
       const frames = getFrameBlocks("Base1");
+    
       await loadFonts(texts.map((item) => item.fontName)); // Загружаем необходимые шрифты
 
       frames.map((item) => {
@@ -81,10 +90,6 @@ async function makeBanner(data: BaseBlock[], positionY: number): Promise<void> {
         frames.find((frame) => {
           if (frame.name === item.name) {
             frame.appendChild(item)
-            const frameWidth = frame.width;
-            const frameHeight = frame.height;
-            const itemWidth = item.width;
-            const itemHeight = item.height;
             item.x = (frame.width - item.width) / 2;
             item.y = (frame.height - item.height) / 2;
           } else {
@@ -166,9 +171,8 @@ function getGroup(name: String) {
  * @returns url изображения
  */
 function getEvent(name: String) {
-  let url = "https://firebasestorage.googleapis.com/v0/b/sportbanners-1163a.appspot.com/o/images%2FtestBanner%2FlogoMiddle.png?alt=media&token=cfd80ed7-4443-4a9b-91a4-fcce204b03dc";
-  //let url = "https://firebasestorage.googleapis.com/v0/b/sportbanners-1163a.appspot.com/o/images%2FtestBanner%2FGrayhound%20Gaming.svg?alt=media&token=424cf688-f65e-47e9-a9d3-a56e65fc8878";
-  return url;
+  const event = events.find((event: any) => event.name === name);
+  return event.logoUrl;
 }
 
 /**
@@ -204,9 +208,11 @@ function getPlayer(name: string, statusEvent: boolean, statusGroup: number) {
 */
 function makeBannerObject(bannerData: any) {
   const formatedData = modifyData(bannerData)
-  const blocksMapping: Record<'date' | 'title' | 'event' | 'owner' | 'quest' | 'logoCaptionLeft' | 'logoCaptionRight', () => BaseBlock | BaseBlock[]> = {
+ 
+  const blocksMapping: Record<'date' | 'title' | 'event' | 'owner' | 'quest' | 'logoCaptionLeft' | 'logoCaptionRight' | 'eventCaption', () => BaseBlock | BaseBlock[]> = {
     title: () => createBaseBlock({ name: 'title', textContent: formatedData['title'] }),
     date: () => createBaseBlock({ name: 'date', textContent: formatedData['date'] }),
+    eventCaption: () => createBaseBlock({ name: 'eventCaption', textContent: formatedData['eventCaption'] }),
     event: () => createBaseBlock({ name: 'event', imageUrl: getEvent(formatedData['event']) }),
     owner: () => [
       createBaseBlock({ name: 'logoOwner', imageUrl: getGroup(formatedData['owner'].logoOwner) }),
@@ -221,12 +227,12 @@ function makeBannerObject(bannerData: any) {
   }
 
 
-  const finalData: BaseBlock[] = [
+ /*  const finalData: BaseBlock[] = [
     createBaseBlock({ name: 'background', imageUrl: "https://firebasestorage.googleapis.com/v0/b/sportbanners-1163a.appspot.com/o/images%2FtestBanner%2Fbackground.jpg?alt=media&token=6da34b57-e6c3-4cfc-8365-95a03848aa10" }),
-  ];
-
+  ]; */
+  const finalData: BaseBlock[] = []
   for (const key in formatedData) {
-    const blockCreator = blocksMapping[key as 'date' | 'title' | 'event' | 'owner' | 'quest' | 'logoCaptionLeft' | 'logoCaptionRight'];
+    const blockCreator = blocksMapping[key as 'date' | 'title' | 'event' | 'owner' | 'quest' | 'logoCaptionLeft' | 'logoCaptionRight' | 'eventCaption'];
     if (blockCreator) {
       const newBlocks = blockCreator();
       finalData.push(...(Array.isArray(newBlocks) ? newBlocks : [newBlocks]));

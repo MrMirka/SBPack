@@ -1,4 +1,4 @@
-import { getData, transformGroupData, transformPlayersData } from "./utilites/Reposotiry";
+import { getData, transformGroupData, transformPlayersData, transformEventData } from "./utilites/Reposotiry";
 import { getBannerFromCSV } from "./utilites/Database";
 import { createCoordinate } from "./utilites/Utils";
 import { Initdata } from "./utilites/Constructor";
@@ -15,8 +15,9 @@ figma.ui.onmessage = (msg) => {
       let clubs = transformGroupData(data.clubs)
       let unions = transformGroupData(data.unions)
       let players = transformPlayersData(data.players)
-      if (clubs && players && unions) {
-        Initdata(clubs, unions, players);
+      let events = transformEventData(data.events)
+      if (clubs && players && unions && events) {
+        Initdata(clubs, unions, players, events);
       }
       if (banners) {
         const coordanate = createCoordinate(banners.length, 50, 1080)

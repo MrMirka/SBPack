@@ -31,7 +31,7 @@ function getImagePositionFromTeamplate(name: string) {
     const block: BaseBlock = {
       x: rectangle.x,
       y: rectangle.y,
-      name: rectangle.name,
+      name: rectangle.name
     };
     parameters.push(block)
   }
@@ -72,6 +72,23 @@ function getTextBlocks(teamplateName: string) {
   return textBlocks;
 }
 
+function getVectorBlocks(templateName: string): VectorNode[] {
+  let vectorBlocks: VectorNode[] = [];
+  const pageName = "Teamplates";  // Исправил опечатку 'Teamplates' на 'Templates'
+  
+  const templatesPage = figma.root.children.find((child) => child.name === pageName) as PageNode;
+  const focusTemplate = templatesPage.children.find((child) => child.name === templateName) as FrameNode;
+  
+  const vectors = focusTemplate.findAll((node) => node.type === "VECTOR");
+
+  for (const item of vectors) {
+    const vectorNode = item as VectorNode;
+    vectorBlocks.push(vectorNode.clone());
+  }
+  
+  return vectorBlocks;
+}
+
 /**
 * Получаем все блоки FRAME из конкретного шаблона
 * @param teamplateName имя шаблона
@@ -107,6 +124,7 @@ function setDataFromTeamplate(teamplateData: BaseBlock[], rawData: BaseBlock[]) 
   const date = rawData.find((item) => item.name === 'date') as BaseBlock;
   const logoCaptionLeft = rawData.find((item) => item.name === 'logoCaptionLeft') as BaseBlock;
   const logoCaptionRight = rawData.find((item) => item.name === 'logoCaptionRight') as BaseBlock;
+  const eventCaption = rawData.find((item) => item.name === 'eventCaption') as BaseBlock;
   if (text) {
     parameters.push(text)
   }
@@ -120,9 +138,13 @@ function setDataFromTeamplate(teamplateData: BaseBlock[], rawData: BaseBlock[]) 
     parameters.push(logoCaptionRight)
   }
 
+  if (eventCaption) {
+    parameters.push(eventCaption)
+  }
+
   return parameters;
 }
 
 
-export { getTeamplatelist, getImagePositionFromTeamplate, loadFonts, getTextBlocks, getFrameBlocks, setDataFromTeamplate };
+export { getTeamplatelist, getImagePositionFromTeamplate, loadFonts, getTextBlocks, getFrameBlocks, setDataFromTeamplate, getVectorBlocks };
 

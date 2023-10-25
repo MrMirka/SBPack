@@ -3,6 +3,7 @@ interface BaseBlock {
     name?: string,
     x?: number,
     y?: number,
+    align?: string,
     width?: number,
     height?: number,
     imageUrl?: string,
