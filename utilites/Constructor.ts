@@ -34,6 +34,9 @@ async function makeBanner(data: BaseBlock[], positionY: number): Promise<void> {
     frameOne.name = "TestBanner" + Date.now();
     
     
+    /**
+     * Назначаем цвета на векторные объекты
+     */
     const shapes = getVectorBlocks("Base1");
     shapes.map((shape)=>{
       if(shape.name !== 'Background') {
