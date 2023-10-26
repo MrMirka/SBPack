@@ -277,7 +277,7 @@ function makeBannerObject(bannerData: any) {
       finalData.push(...(Array.isArray(newBlocks) ? newBlocks : [newBlocks]));
     }
   }
-  console.log(finalData)
+  
   return finalData;
 }
 
