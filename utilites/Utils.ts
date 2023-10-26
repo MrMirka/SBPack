@@ -10,6 +10,7 @@ import { getImagePositionFromTeamplate, setDataFromTeamplate } from "./ElementsF
 function createCoordinate(count: number, step: number, height: number) {
   return Array.from({ length: count }, (_, i) => (height + step) * i);
 }
+
 function initBanners(banners: any[], coordinate: number[]) {
   //Загружаем настройки шаблона с именем Base1
   let tParameters = getImagePositionFromTeamplate("Base1")
@@ -27,4 +28,17 @@ function initBanners(banners: any[], coordinate: number[]) {
   })
 }
 
-export { createCoordinate, initBanners };
+function hexToRgba(hex: string): { r: number, g: number, b: number} {
+  const bigint = parseInt(hex.slice(1), 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+
+  return {
+      r: r / 255,
+      g: g / 255,
+      b: b / 255,
+  };
+}
+
+export { createCoordinate, initBanners, hexToRgba };

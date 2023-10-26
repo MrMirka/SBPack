@@ -1,4 +1,5 @@
 import { getTextBlocks, getFrameBlocks, loadFonts, getVectorBlocks } from "./ElementsFigma";
+import { hexToRgba } from "./Utils";
 
 let clubs: any;
 let unions: any;
@@ -32,8 +33,18 @@ async function makeBanner(data: BaseBlock[], positionY: number): Promise<void> {
     frameOne.y = positionY;
     frameOne.name = "TestBanner" + Date.now();
     
+    
     const shapes = getVectorBlocks("Base1");
     shapes.map((shape)=>{
+      if(shape.name !== 'Background') {
+        const color = data.find(color => color.name === shape.name);
+        const colorHEX  = "#" + color?.textContent
+        const colorRGB = hexToRgba(colorHEX as string)
+        shape.fills = [{
+          type: 'SOLID',
+          color: colorRGB
+      }]
+      }
       frameOne.appendChild(shape);
     })
  
@@ -107,6 +118,25 @@ async function makeBanner(data: BaseBlock[], positionY: number): Promise<void> {
       reject(error); // Отклоняем промис в случае ошибки
     }
   });
+}
+
+/**
+ * Получаем соответствие цвета для конктерного клуба или сборной
+ * @param name Имя клуба или сборной
+ * @param colorType основной или вторичный цвет
+ * @returns 
+ */
+function getColorsByName(name:string, colorType: string) {
+  const type = clubOrUnion(name)
+  if(type == 0) {
+    const item = clubs.find((club: { name: string; }) => club.name === name);
+    return item[colorType];
+  } else if(type == 1) {
+    const item = unions.find((union: { name: string; }) => union.name === name);
+    return item[colorType];
+  } else {
+    return ""
+  }
 }
 
 //Обрабатывает сырой объект их CSV
@@ -189,7 +219,7 @@ function getPlayer(name: string, statusEvent: boolean, statusGroup: number) {
     if (statusGroup === 0) {
       url = player.clubOwnerURL
     } else {
-      url = player.unionGuestURL
+      url = player.unionOwnerURL
     }
   } else { //Quest
     if (statusGroup === 0) {
@@ -207,8 +237,9 @@ function getPlayer(name: string, statusEvent: boolean, statusGroup: number) {
 * @returns финальный объект который попадет в функцию отрисовки
 */
 function makeBannerObject(bannerData: any) {
+  
   const formatedData = modifyData(bannerData)
- 
+  
   const blocksMapping: Record<'date' | 'title' | 'event' | 'owner' | 'quest' | 'logoCaptionLeft' | 'logoCaptionRight' | 'eventCaption', () => BaseBlock | BaseBlock[]> = {
     title: () => createBaseBlock({ name: 'title', textContent: formatedData['title'] }),
     date: () => createBaseBlock({ name: 'date', textContent: formatedData['date'] }),
@@ -216,11 +247,16 @@ function makeBannerObject(bannerData: any) {
     event: () => createBaseBlock({ name: 'event', imageUrl: getEvent(formatedData['event']) }),
     owner: () => [
       createBaseBlock({ name: 'logoOwner', imageUrl: getGroup(formatedData['owner'].logoOwner) }),
-      createBaseBlock({ name: 'playerOwner', imageUrl: getPlayer(formatedData['owner'].playerOwner, true, clubOrUnion(formatedData['owner'].logoOwner)) })
+      createBaseBlock({ name: 'playerOwner', imageUrl: getPlayer(formatedData['owner'].playerOwner, true, clubOrUnion(formatedData['owner'].logoOwner)) }),
+      createBaseBlock({ name: 'OwnerMainColor', textContent: getColorsByName(formatedData['owner'].logoOwner, 'mainColor') }),
+      createBaseBlock({ name: 'OwnerSecondColor', textContent: getColorsByName(formatedData['owner'].logoOwner, 'secondColor') })
+      
     ],
     quest: () => [
       createBaseBlock({ name: 'logoQuest', imageUrl: getGroup(formatedData['quest'].logoQuest) }),
-      createBaseBlock({ name: 'playerQuest', imageUrl: getPlayer(formatedData['quest'].playerQuest, false, clubOrUnion(formatedData['quest'].logoQuest)) })
+      createBaseBlock({ name: 'playerQuest', imageUrl: getPlayer(formatedData['quest'].playerQuest, false, clubOrUnion(formatedData['quest'].logoQuest)) }),
+      createBaseBlock({ name: 'QuestMainColor', textContent: getColorsByName(formatedData['quest'].logoQuest, 'mainColor') }),
+      createBaseBlock({ name: 'QuestSecondColor', textContent: getColorsByName(formatedData['quest'].logoQuest, 'secondColor') })
     ],
     logoCaptionLeft: () => createBaseBlock({ name: 'logoCaptionLeft', textContent: formatedData['logoCaptionLeft'] }),
     logoCaptionRight: () => createBaseBlock({ name: 'logoCaptionRight', textContent: formatedData['logoCaptionRight'] }),
@@ -238,6 +274,7 @@ function makeBannerObject(bannerData: any) {
       finalData.push(...(Array.isArray(newBlocks) ? newBlocks : [newBlocks]));
     }
   }
+  console.log(finalData)
   return finalData;
 }
 

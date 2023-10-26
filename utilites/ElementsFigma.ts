@@ -125,6 +125,11 @@ function setDataFromTeamplate(teamplateData: BaseBlock[], rawData: BaseBlock[]) 
   const logoCaptionLeft = rawData.find((item) => item.name === 'logoCaptionLeft') as BaseBlock;
   const logoCaptionRight = rawData.find((item) => item.name === 'logoCaptionRight') as BaseBlock;
   const eventCaption = rawData.find((item) => item.name === 'eventCaption') as BaseBlock;
+
+  const OwnerMainColor = rawData.find((item) => item.name === 'OwnerMainColor') as BaseBlock;
+  const OwnerSecondColor = rawData.find((item) => item.name === 'OwnerSecondColor') as BaseBlock;
+  const QuestMainColor = rawData.find((item) => item.name === 'QuestMainColor') as BaseBlock;
+  const QuestSecondColor = rawData.find((item) => item.name === 'QuestSecondColor') as BaseBlock;
   if (text) {
     parameters.push(text)
   }
@@ -140,6 +145,19 @@ function setDataFromTeamplate(teamplateData: BaseBlock[], rawData: BaseBlock[]) 
 
   if (eventCaption) {
     parameters.push(eventCaption)
+  }
+
+  if (OwnerMainColor) {
+    parameters.push(OwnerMainColor)
+  }
+  if (OwnerSecondColor) {
+    parameters.push(OwnerSecondColor)
+  }
+  if (QuestMainColor) {
+    parameters.push(QuestMainColor)
+  }
+  if (QuestSecondColor) {
+    parameters.push(QuestSecondColor)
   }
 
   return parameters;

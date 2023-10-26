@@ -38,6 +38,7 @@ function getData(callback: (data: any) => void) {
 
 //Оптимизируем JSON ответ от сервера содержащий клубы или сборные
 function transformGroupData(data: any): any[] {
+  
   if (!data || !data.documents || !Array.isArray(data.documents)) {
     return [];
   }
@@ -47,6 +48,8 @@ function transformGroupData(data: any): any[] {
       id: item.fields?.id?.stringValue || "",
       name: item.fields?.name?.stringValue || "",
       logoUrl: item.fields?.logoURL?.stringValue || "",
+      mainColor: item.fields?.mainColor?.stringValue || "",
+      secondColor: item.fields?.secondColor?.stringValue || "",
     };
   });
 }
